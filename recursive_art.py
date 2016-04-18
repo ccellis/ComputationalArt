@@ -1,4 +1,6 @@
-""" TODO: Put your header comment here """
+""" SoftDes Spring 2016 MP2
+Author: Coleman Ellis
+This program generates pieces of art based on deeply nested random functions."""
 
 import random
 from PIL import Image
@@ -26,9 +28,9 @@ def build_random_function(min_depth, max_depth, depth = 0):
 
     #These lists of functions gave me the best looking results
     three_parameters = []
-    two_parameters = ["prod","avg","circle","diff"]
-    one_parameter  = ["cos_pi_3","cos_pi","sin_pi_3","sin_pi","intensify"]
-    no_parameters  = ["x","y","t","t"]
+    two_parameters = ["prod","avg","circle","circle"]
+    one_parameter  = ["cos_pi","cos_pi_3","sin_pi","sin_pi_3"]
+    no_parameters  = ["x","y","t"]
     random_functions = no_parameters+one_parameter+two_parameters+three_parameters
 
     if max_depth == 1:
@@ -69,9 +71,9 @@ def build_random_function(min_depth, max_depth, depth = 0):
     elif random_function == "sin_pi":
         return lambda x,y,t: np.sin(pi*new_function(x,y,t))
     elif random_function == "cos_pi_3":
-        return lambda x,y,t: np.cos(3*new_function(x,y,t))
+        return lambda x,y,t: np.cos(3*new_function(y,x,t))
     elif random_function == "sin_pi_3":
-        return lambda x,y,t: np.sin(3*new_function(x,y,t))
+        return lambda x,y,t: np.sin(3*new_function(y,x,t))
     elif random_function == "square":
         return lambda x,y,t: new_function(x,y,t)**2
     elif random_function == "cube":
@@ -111,61 +113,6 @@ def build_random_function(min_depth, max_depth, depth = 0):
     elif random_function == "3prod":
         return lambda x,y,t: new_function(x,y,t)*new_function_2(x,y,t)*new_function_3(x,y,t)
 
-    #Original Code
-    #returns: the randomly generated function represented as a nested list
-    '''if random_function in two_parameters:
-        return [random_function, build_random_function(min_depth-1,max_depth-1), build_random_function(min_depth-1,max_depth-1)]
-    elif random_function in one_parameter:
-        return [random_function,build_random_function(min_depth-1,max_depth-1)]
-    else:
-        return [random_function]'''
-
-
-
-def evaluate_random_function(f, x, y):
-    """ Evaluate the random function f with inputs x,y
-        Representation of the function f is defined in the assignment writeup
-
-        f: the function to evaluate
-        x: the value of x to be used to evaluate the function
-        y: the value of y to be used to evaluate the function
-        returns: the function value
-
-        >>> evaluate_random_function(["x"],-0.5, 0.75)
-        -0.5
-        >>> evaluate_random_function(["y"],0.1,0.02)
-        0.02
-        >>> evaluate_random_function(["cos_pi",["x"]],0.5,1)
-        6.123233995736766e-17
-        >>> evaluate_random_function(["avg",["cos_pi",["x"]],["sin_pi",["y"]]],0.5,0.5)
-        0.5
-
-        This should not be needed now, as build_random_function returns a function
-
-        The functions don't always round things off to 0, but 6e-17 is close enough
-    """
-    if f[0] == "x":
-        return x
-    elif f[0] == "y":
-        return y
-    elif f[0] == "prod":
-        return evaluate_random_function(f[1],x,y) * evaluate_random_function(f[2],x,y)
-    elif f[0] == "avg":
-        return (evaluate_random_function(f[1],x,y) + evaluate_random_function(f[2],x,y))/2.0
-    elif f[0] == "circle":
-        return sqrt((evaluate_random_function(f[1],x,y)**2)/2 + (evaluate_random_function(f[2],x,y)**2)/2)
-    elif f[0] == "square":
-        return evaluate_random_function(f[1],x,y)**2
-    elif f[0] == "cube":
-        return evaluate_random_function(f[1],x,y)**3
-    elif f[0] == "negative":
-        return -evaluate_random_function(f[1],x,y)
-    elif f[0] == "cos_pi":
-        return math.cos(pi*evaluate_random_function(f[1],x,y))
-    elif f[0] == "sin_pi":
-        return math.sin(pi*evaluate_random_function(f[1],x,y))
-
-
 def remap_interval(val,
                    input_min,
                    input_max,
@@ -197,12 +144,6 @@ def remap_interval(val,
         >>> remap_interval(5.0, 4.0, 6.0, 1.0, 2.0)
         1.5
     """
-    #Make sure decimal division happens
-    """val        = float(val)
-    input_min  = float(input_min)
-    input_max  = float(input_max)
-    output_min = float(output_min)
-    output_max = float(output_max)"""
 
     #Find how big the value is compared to its possible range
     ratio = ((val-input_min)/(input_max - input_min))
@@ -233,30 +174,8 @@ def color_map(val):
         to integers later on, but there's no nice way to make it so
         numpy matrices and individual numbers return as integers.
     """
-    # NOTE: This relies on remap_interval, which you must provide
     color_code = remap_interval(val, -1, 1, 0, 255)
     return color_code
-
-
-def test_image(filename, x_size=350, y_size=350):
-    """ Generate test image with random pixels and save as an image file.
-
-        filename: string filename for image (should be .png)
-        x_size, y_size: optional args to set image dimensions (default: 350)
-    """
-    # Create image and loop over all pixels
-    im = Image.new("RGB", (x_size, y_size))
-    pixels = im.load()
-    for i in range(x_size):
-        for j in range(y_size):
-            x = remap_interval(i, 0, x_size, -1, 1)
-            y = remap_interval(j, 0, y_size, -1, 1)
-            pixels[i, j] = (random.randint(0, 255),  # Red channel
-                            random.randint(0, 255),  # Green channel
-                            random.randint(0, 255))  # Blue channel
-
-    im.save(filename)
-
 
 def generate_art(filename, x_size=1920, y_size=1080,timespan=150):
     """ Generate computational art and save as an image file.
@@ -278,11 +197,6 @@ def generate_art(filename, x_size=1920, y_size=1080,timespan=150):
     green_function = build_random_function(10,12)
     blue_function = build_random_function(10,12)
 
-    #Pre-numpy image creation
-    """# Create image and loop over all pixels
-    im = Image.new("RGB", (x_size, y_size))
-    pixels = im.load()"""
-
     #Creates matrices for x and y.
     #  |-1 0 1|   |-1 -1 -1|
     #x=|-1 0 1| y=| 0  0  0|
@@ -295,64 +209,27 @@ def generate_art(filename, x_size=1920, y_size=1080,timespan=150):
     #This keeps track of the number of frames generated
     t_index = 0
 
-    #t is harmonically spaced from -1 to 1
-    #which makes for smoother looping animations
-    for t in np.cos(pi*np.linspace(0,1,timespan)):
+    #t is linearly spaced from -1 to 1
+    for t in np.linspace(-1,1,timespan):
 
         red = color_map(red_function(x,y,t))
         green = color_map(green_function(x,y,t))
         blue = color_map(blue_function(x,y,t))
-
-        # print red.shape
-        # print red
-        # print green.shape
-        # print green
-        # print blue.shape
-        # print blue
 
         #This transforms the three 1920x1080 matrices into one 1920x1080x3 matrix
         #The transposes are necessary to get the dimensions right
         #Without them you get a 3x1920x1080 matrix
         pixels = np.vstack(([red.T],[green.T],[blue.T])).T
 
-        # print pixels.shape
-        # print pixels
 
         #Cast the array to integers, Image.fromarray requires it
         im = Image.fromarray(pixels.astype(np.uint8))
-        im.save(filename%t_index)
-        im.save(filename%((timespan)*2-(t_index+1)))
+        im.save(filename%t_index,compression=1)
         t_index += 1
-
-        #print t_index
-
-    #Original
-    """for i in range(x_size):
-        for j in range(y_size):
-            x = remap_interval(i, 0, x_size, -1, 1)
-            y = remap_interval(j, 0, y_size, -1, 1)
-            pixels[i, j] = (
-                    #color_map(evaluate_random_function(red_function, x, y)),
-                    #color_map(evaluate_random_function(green_function, x, y)),
-                    #color_map(evaluate_random_function(blue_function, x, y))
-                    color_map(red_function(x,y)),
-                    color_map(green_function(x,y)),
-                    color_map(blue_function(x,y))
-                    )"""
-
-    #im.save(filename)
 
 
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    # Create some computational art!
-    
-    # i = 1
-    # while i:
-    #    generate_art(str(i) + "frame%03d.png",1920,1080,150)
-    #    print "{} done".format(i)
-    #    i += 1
-
-    generate_art("myframe%03d.png",1920,1080,150)
+    generate_art("myframe%03d.png",640,480,1)
