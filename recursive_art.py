@@ -1,4 +1,6 @@
-""" TODO: Put your header comment here """
+""" SoftDes Spring 2016 MP2
+Author: Coleman Ellis
+This program generates pieces of art based on deeply nested random functions."""
 
 import random
 from PIL import Image
@@ -26,9 +28,9 @@ def build_random_function(min_depth, max_depth, depth = 0):
 
     #These lists of functions gave me the best looking results
     three_parameters = []
-    two_parameters = ["prod","avg","circle","diff"]
-    one_parameter  = ["cos_pi_3","cos_pi","sin_pi_3","sin_pi","intensify"]
-    no_parameters  = ["x","y","t","t"]
+    two_parameters = ["prod","avg","circle","circle"]
+    one_parameter  = ["cos_pi","cos_pi_3","sin_pi","sin_pi_3"]
+    no_parameters  = ["x","y","t"]
     random_functions = no_parameters+one_parameter+two_parameters+three_parameters
 
     if max_depth == 1:
@@ -69,9 +71,9 @@ def build_random_function(min_depth, max_depth, depth = 0):
     elif random_function == "sin_pi":
         return lambda x,y,t: np.sin(pi*new_function(x,y,t))
     elif random_function == "cos_pi_3":
-        return lambda x,y,t: np.cos(3*new_function(x,y,t))
+        return lambda x,y,t: np.cos(3*new_function(y,x,t))
     elif random_function == "sin_pi_3":
-        return lambda x,y,t: np.sin(3*new_function(x,y,t))
+        return lambda x,y,t: np.sin(3*new_function(y,x,t))
     elif random_function == "square":
         return lambda x,y,t: new_function(x,y,t)**2
     elif random_function == "cube":
@@ -222,7 +224,7 @@ def generate_art(filename, x_size=1920, y_size=1080,timespan=150):
 
         #Cast the array to integers, Image.fromarray requires it
         im = Image.fromarray(pixels.astype(np.uint8))
-        im.save(filename%t_index)
+        im.save(filename%t_index,compression=1)
         t_index += 1
 
 
@@ -230,12 +232,4 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    # Create some computational art!
-    
-    # i = 1
-    # while i:
-    #    generate_art(str(i) + "frame%03d.png",1920,1080,150)
-    #    print "{} done".format(i)
-    #    i += 1
-
-    generate_art("myframe%03d.png",1920,1080,150)
+    generate_art("myframe%03d.png",640,480,1)
